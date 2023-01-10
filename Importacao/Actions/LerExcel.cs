@@ -20,8 +20,13 @@ namespace Importacao.Actions
             {
                 ExcelWorksheet worksheet = pacote.Workbook.Worksheets[0];
                 int colunaCont = worksheet.Dimension.End.Column;
-
                 int linhaCont = worksheet.Dimension.End.Row;
+                int posicao = 1;
+                for (int coluna = 1; coluna <= colunaCont; coluna++)
+                {
+                    if (worksheet.Cells[1, coluna].Value?.ToString() == "NomePessoa")
+                        posicao = coluna;
+                }
 
                 for (int linha = 2; linha <= linhaCont; linha++)
                 {
@@ -29,21 +34,27 @@ namespace Importacao.Actions
                     try
                     {
                         pessoa.Id = Guid.NewGuid().ToString("N");
-                        pessoa.Email = Convert.ToDecimal(worksheet.Cells[linha, 2].Value);
                         pessoa.DataCriacao = DateTime.Now;
-                        pessoa.Nome = worksheet.Cells[linha, 1].Value?.ToString();
+                        pessoa.Nome = worksheet.Cells[linha, posicao].Value?.ToString();
+                        pessoa.CPF = worksheet.Cells[linha, posicao + 1].Value?.ToString();
+                        pessoa.Telefone = worksheet.Cells[linha, posicao + 2].Value?.ToString();
+                        pessoa.CEP = worksheet.Cells[linha, posicao + 3].Value?.ToString();
                     }
 
                     catch(Exception ex)
                     {
                         throw;
                     }
-                    pessoas.Add(pessoa);
+                    if(pessoa.CPF != null)
+                        pessoas.Add(pessoa);
                 }
             }
             foreach(Pessoa pessoa in pessoas)
             {
                 pessoa.Nome = pessoa.Nome?.Trim();
+                pessoa.CPF = pessoa.CPF?.Replace("-", "").Replace(".", "").Replace(@"\", "").Trim();
+                pessoa.CEP = pessoa.CEP?.Replace("-", "".Trim());
+                pessoa.Telefone = pessoa.Telefone?.Replace("-", "").Replace("(", "").Replace(")", "").Trim();
             }
             return pessoas;
         }
@@ -58,28 +69,34 @@ namespace Importacao.Actions
             {
                 ExcelWorksheet worksheet = pacote.Workbook.Worksheets[0];
                 int colunaCont = worksheet.Dimension.End.Column;
-
                 int linhaCont = worksheet.Dimension.End.Row;
+                
 
                 for (int linha = 2; linha <= linhaCont; linha++)
                 {
                     var animal = new Animais();
+                    for (int coluna = 1; coluna <= colunaCont; coluna++)
+                    {
+                        if (worksheet.Cells[1, coluna].Value?.ToString() == "CPF")
+                            animal.IdPessoa = worksheet.Cells[linha, coluna].Value?.ToString();
+                    }
+                    
                     try
                     {
-                        animal.Id = Guid.NewGuid().ToString("N");
+                        animal.IdAnimal = Guid.NewGuid().ToString("N");
                         animal.DataCriacao = DateTime.Now;
                         animal.Nome = worksheet.Cells[linha, 1].Value?.ToString();
                         animal.Especie = worksheet.Cells[linha, 2].Value?.ToString();
                         animal.Peso = Convert.ToDecimal(worksheet.Cells[linha, 3].Value);
                         animal.ChipRastreador = worksheet.Cells[linha, 4].Value?.ToString();
-                        animal.NomeDono = worksheet.Cells[linha, 5].Value?.ToString();
                     }
 
                     catch (Exception ex)
                     {
                         throw;
                     }
-                    animais.Add(animal);
+                    if (animal.ChipRastreador != null)
+                        animais.Add(animal);
                 }
             }
             foreach (Animais animal in animais)
@@ -87,7 +104,8 @@ namespace Importacao.Actions
                 animal.Nome = animal.Nome?.Trim();
                 animal.Especie = animal.Especie?.Trim();
                 animal.ChipRastreador = animal.ChipRastreador?.Trim();
-                animal.NomeDono = animal.Nome?.Trim();
+                string cpf = animal.IdPessoa?.Replace("-", "").Replace(".", "").Replace(@"\", "");
+                animal.IdPessoa = SavePessoas.GetId(cpf);
             }
             return animais;
         }

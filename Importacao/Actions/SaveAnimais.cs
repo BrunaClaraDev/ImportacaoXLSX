@@ -11,7 +11,7 @@ namespace Importacao.Actions
 {
     public class SaveAnimais
     {
-        public static bool GetNome(Animais animal)
+        public static bool ExisteAnimal(Animais animal)
         {
             var animalExiste = new Animais();
             using (var connection = new SqlConnection("Server=.\\sqlexpress;Database=TestesImportacao;Trusted_Connection=True;"))
@@ -29,10 +29,12 @@ namespace Importacao.Actions
             {
                 if (animal.Nome != null)
                 {
+                    var idPessoa = "";
+                    if(animal.IdPessoa != null)
+                         idPessoa = ", IdPessoa = '" + animal.IdPessoa +"' ";
                     var peso = animal.Peso.ToString().Replace(',', '.');
                     var pessoaAtualizada = connection.QueryFirstOrDefault<Pessoa>("UPDATE Animais SET DataCriacao = '"+ animal.DataCriacao +"', Nome = '"+ 
-                        animal.Nome +"', Especie = '"+ animal.Especie +"', Peso = "+ peso +", NomeDono = '"+ animal.NomeDono 
-                        +"' WHERE ChipRastreador = '"+ animal.ChipRastreador +"'");
+                        animal.Nome +"', Especie = '"+ animal.Especie +"', Peso = "+ peso + idPessoa +" WHERE ChipRastreador = '"+ animal.ChipRastreador +"'");
                 }
             }
         }
@@ -43,7 +45,7 @@ namespace Importacao.Actions
             {
                 foreach (Animais animal in animais)
                 {
-                    var existe = GetNome(animal);
+                    var existe = ExisteAnimal(animal);
                     if (existe == false)
                         connection.Insert(animal);
                     else
