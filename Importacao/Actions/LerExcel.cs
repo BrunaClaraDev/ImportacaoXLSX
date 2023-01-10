@@ -2,9 +2,9 @@
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
-
-
+using Xceed.Wpf.Toolkit;
 
 namespace Importacao.Actions
 {
@@ -12,7 +12,7 @@ namespace Importacao.Actions
     {
         public static List<Pessoa> LerXLSX(MemoryStream stream)
         {
-            var resposta = new List<Pessoa>();
+            var pessoas = new List<Pessoa>();
 
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
@@ -31,16 +31,21 @@ namespace Importacao.Actions
                         pessoa.Id = Guid.NewGuid().ToString("N");
                         pessoa.Email = Convert.ToDecimal(worksheet.Cells[linha, 2].Value);
                         pessoa.DataCriacao = DateTime.Now;
-                        pessoa.Nome = worksheet.Cells[linha, 1].Value.ToString();
+                        pessoa.Nome = worksheet.Cells[linha, 1].Value?.ToString();
                     }
 
-                    catch(NullReferenceException ex)
+                    catch(Exception ex)
                     {
+                        throw;
                     }
-                    resposta.Add(pessoa);
+                    pessoas.Add(pessoa);
                 }
             }
-            return resposta;
+            foreach(Pessoa pessoa in pessoas)
+            {
+                pessoa.Nome = pessoa.Nome?.Trim();
+            }
+            return pessoas;
         }
     }
 }

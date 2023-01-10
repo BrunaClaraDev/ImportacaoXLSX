@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "8BL2C16AprTpaUNSCSRejZcFVcyu0YnI4V0Nmxz6rthQsXyIokLDVGabCpv+w9NmppAL/hEXGT2DpQ5fdV3KPQ==",
+  "dgSpecHash": "4ndJSrhuY8ydkLBfa+uuxlmKXzXfHbdj2ccpMSuC3va1+6T1PnAfj6LsI37CXB5x4r7GtZ2oNJGiRk01DpwCsg==",
   "success": true,
   "projectFilePath": "C:\\Users\\SQUADRA\\Desktop\\Importacao\\Importacao\\Importacao.csproj",
   "expectedPackageFiles": [
@@ -9,6 +9,7 @@
     "C:\\Users\\SQUADRA\\.nuget\\packages\\epplus\\6.1.1\\epplus.6.1.1.nupkg.sha512",
     "C:\\Users\\SQUADRA\\.nuget\\packages\\epplus.interfaces\\6.1.1\\epplus.interfaces.6.1.1.nupkg.sha512",
     "C:\\Users\\SQUADRA\\.nuget\\packages\\epplus.system.drawing\\6.1.1\\epplus.system.drawing.6.1.1.nupkg.sha512",
+    "C:\\Users\\SQUADRA\\.nuget\\packages\\extended.wpf.toolkit\\4.5.0\\extended.wpf.toolkit.4.5.0.nupkg.sha512",
     "C:\\Users\\SQUADRA\\.nuget\\packages\\microsoft.extensions.apidescription.server\\3.0.0\\microsoft.extensions.apidescription.server.3.0.0.nupkg.sha512",
     "C:\\Users\\SQUADRA\\.nuget\\packages\\microsoft.extensions.configuration\\3.1.30\\microsoft.extensions.configuration.3.1.30.nupkg.sha512",
     "C:\\Users\\SQUADRA\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\3.1.30\\microsoft.extensions.configuration.abstractions.3.1.30.nupkg.sha512",

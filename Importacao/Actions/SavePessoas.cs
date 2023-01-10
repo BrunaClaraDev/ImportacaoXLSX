@@ -13,11 +13,9 @@ namespace Importacao.Actions
             var pessoaExiste = new Pessoa();
             using (var connection = new SqlConnection("Server=.\\sqlexpress;Database=TestesImportacao;Trusted_Connection=True;"))
             {
-                pessoaExiste = connection.QueryFirstOrDefault<Pessoa>(" SELECT P.Nome ,P.DataCriacao,P.Id,P.Email FROM TestesImportacao.dbo.Pessoas P where P.Nome = '" + pessoa.Nome + "'");
+                pessoaExiste = connection.QueryFirstOrDefault<Pessoa>(" SELECT P.Nome ,P.DataCriacao,P.Id,P.Email FROM TestesImportacao.dbo.Pessoas P where UPPER (P.Nome) = '" + pessoa.Nome + "'");
                 if (pessoaExiste != null)
-                {
                     return true;
-                }
                 return false;
             }
         }
@@ -28,8 +26,9 @@ namespace Importacao.Actions
             {
                 if (pessoa.Nome != null)
                 {
+                    var email = pessoa.Email.ToString().Replace(',', '.');
                     var pessoaAtualizada = connection.QueryFirstOrDefault<Pessoa>(" UPDATE Pessoas SET DataCriacao = '" + pessoa.DataCriacao
-                        + "', Email = " + pessoa.Email + " WHERE Nome = '" + pessoa.Nome + "'");
+                        + "', Email = " + email + " WHERE Nome = '" + pessoa.Nome + "'");
                 }
             }
         }
@@ -42,13 +41,9 @@ namespace Importacao.Actions
                 {
                     var existe = GetNome(pessoa);
                     if (existe == false)
-                    {
                         connection.Insert(pessoa);
-                    }
                     else
-                    {
                         Atualizar(pessoa);
-                    }
                 }
             }
         }
