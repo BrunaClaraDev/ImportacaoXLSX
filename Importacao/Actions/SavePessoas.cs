@@ -13,7 +13,7 @@ namespace Importacao.Actions
             var pessoaExiste = new Pessoa();
             using (var connection = new SqlConnection("Server=.\\sqlexpress;Database=TestesImportacao;Trusted_Connection=True;"))
             {
-                pessoaExiste = connection.QueryFirstOrDefault<Pessoa>(" SELECT P.CPF FROM TestesImportacao.dbo.Pessoas P where P.CPF = '" + pessoa.CPF + "'");
+                pessoaExiste = connection.QueryFirstOrDefault<Pessoa>(" SELECT P.CPF FROM TestesImportacao.dbo.Pessoas P where P.CPF = @cpf", new { cpf = pessoa.CPF});
                 if (pessoaExiste != null)
                     return true;
                 return false;
@@ -25,7 +25,7 @@ namespace Importacao.Actions
             var pessoaExiste = new Pessoa();
             using (var connection = new SqlConnection("Server=.\\sqlexpress;Database=TestesImportacao;Trusted_Connection=True;"))
             {
-                pessoaExiste = connection.QueryFirstOrDefault<Pessoa>(" SELECT P.CPF, P.Id FROM TestesImportacao.dbo.Pessoas P where P.CPF = '" + cpf + "'");
+                pessoaExiste = connection.QueryFirstOrDefault<Pessoa>(" SELECT P.CPF, P.Id FROM TestesImportacao.dbo.Pessoas P where P.CPF = @cpf", new { cpf = cpf });
                 if (pessoaExiste != null)
                     return pessoaExiste.Id;
                 return null;
@@ -38,8 +38,12 @@ namespace Importacao.Actions
             {
                 if (pessoa.Nome != null)
                 {
-                    var pessoaAtualizada = connection.QueryFirstOrDefault<Pessoa>(" UPDATE Pessoas SET DataCriacao = '" + pessoa.DataCriacao
-                        + "', CEP = '" + pessoa.CEP + "', Telefone = '"+ pessoa.Telefone +"', Nome = '"+ pessoa.Nome +"' WHERE CPF = '" + pessoa.CPF + "'");
+                    var pessoaAtualizada = connection.QueryFirstOrDefault<Pessoa>(" UPDATE Pessoas SET DataCriacao = @data, CEP = @cep, Telefone = @telefone, Nome = @nome WHERE CPF = @cpf",
+                        new {data = pessoa.DataCriacao,
+                             cep = pessoa.CEP,
+                             telefone = pessoa.Telefone,
+                             nome = pessoa.Nome,
+                             cpf = pessoa.CPF});
                 }
             }
         }

@@ -16,7 +16,7 @@ namespace Importacao.Actions
             var animalExiste = new Animais();
             using (var connection = new SqlConnection("Server=.\\sqlexpress;Database=TestesImportacao;Trusted_Connection=True;"))
             {
-                animalExiste = connection.QueryFirstOrDefault<Animais>(" SELECT A.ChipRastreador FROM TestesImportacao.dbo.Animais A where A.ChipRastreador = '"+ animal.ChipRastreador +"'");
+                animalExiste = connection.QueryFirstOrDefault<Animais>(" SELECT A.ChipRastreador FROM TestesImportacao.dbo.Animais A where A.ChipRastreador = @chip", new { chip = animal.ChipRastreador});
                 if (animalExiste != null)
                     return true;
                 return false;
@@ -30,11 +30,18 @@ namespace Importacao.Actions
                 if (animal.Nome != null)
                 {
                     var idPessoa = "";
-                    if(animal.IdPessoa != null)
-                         idPessoa = ", IdPessoa = '" + animal.IdPessoa +"' ";
+                    if (animal.IdPessoa != null)
+                        idPessoa = animal.IdPessoa;
+                    else
+                        idPessoa = null;
                     var peso = animal.Peso.ToString().Replace(',', '.');
-                    var pessoaAtualizada = connection.QueryFirstOrDefault<Pessoa>("UPDATE Animais SET DataCriacao = '"+ animal.DataCriacao +"', Nome = '"+ 
-                        animal.Nome +"', Especie = '"+ animal.Especie +"', Peso = "+ peso + idPessoa +" WHERE ChipRastreador = '"+ animal.ChipRastreador +"'");
+                    var pessoaAtualizada = connection.QueryFirstOrDefault<Pessoa>("UPDATE Animais SET DataCriacao = @data, Nome = @nome, Especie = @especie, Peso = @peso, IdPessoa = @id WHERE ChipRastreador = @chip", 
+                        new {data =animal.DataCriacao,
+                             nome = animal.Nome,
+                             especie = animal.Especie,
+                             peso = animal.Peso,
+                             chip = animal.ChipRastreador,
+                             id = idPessoa});
                 }
             }
         }
