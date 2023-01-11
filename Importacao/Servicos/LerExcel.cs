@@ -1,4 +1,5 @@
-﻿using Importacao.Models;
+﻿using Importacao.Dados;
+using Importacao.Models;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,11 @@ namespace Importacao.Actions
 {
     public class LerExcel
     {
+        private DbSession _db;
+        public LerExcel(DbSession dbSession)
+        {
+            _db = dbSession;
+        }
         public static List<Pessoa> LerPessoas(MemoryStream stream)
         {
             var pessoas = new List<Pessoa>();
@@ -31,20 +37,14 @@ namespace Importacao.Actions
                 for (int linha = 2; linha <= linhaCont; linha++)
                 {
                     var pessoa = new Pessoa();
-                    try
-                    {
-                        pessoa.Id = Guid.NewGuid().ToString("N");
-                        pessoa.DataCriacao = DateTime.Now;
-                        pessoa.Nome = worksheet.Cells[linha, posicao].Value?.ToString();
-                        pessoa.CPF = worksheet.Cells[linha, posicao + 1].Value?.ToString();
-                        pessoa.Telefone = worksheet.Cells[linha, posicao + 2].Value?.ToString();
-                        pessoa.CEP = worksheet.Cells[linha, posicao + 3].Value?.ToString();
-                    }
 
-                    catch(Exception ex)
-                    {
-                        throw;
-                    }
+                    pessoa.Id = Guid.NewGuid().ToString("N");
+                    pessoa.DataCriacao = DateTime.Now;
+                    pessoa.Nome = worksheet.Cells[linha, posicao].Value?.ToString();
+                    pessoa.CPF = worksheet.Cells[linha, posicao + 1].Value?.ToString();
+                    pessoa.Telefone = worksheet.Cells[linha, posicao + 2].Value?.ToString();
+                    pessoa.CEP = worksheet.Cells[linha, posicao + 3].Value?.ToString();
+
                     if(pessoa.CPF != null)
                         pessoas.Add(pessoa);
                 }
@@ -81,20 +81,13 @@ namespace Importacao.Actions
                             animal.IdPessoa = worksheet.Cells[linha, coluna].Value?.ToString();
                     }
                     
-                    try
-                    {
-                        animal.IdAnimal = Guid.NewGuid().ToString("N");
-                        animal.DataCriacao = DateTime.Now;
-                        animal.Nome = worksheet.Cells[linha, 1].Value?.ToString();
-                        animal.Especie = worksheet.Cells[linha, 2].Value?.ToString();
-                        animal.Peso = Convert.ToDecimal(worksheet.Cells[linha, 3].Value);
-                        animal.ChipRastreador = worksheet.Cells[linha, 4].Value?.ToString();
-                    }
+                     animal.IdAnimal = Guid.NewGuid().ToString("N");
+                     animal.DataCriacao = DateTime.Now;
+                     animal.Nome = worksheet.Cells[linha, 1].Value?.ToString();
+                     animal.Especie = worksheet.Cells[linha, 2].Value?.ToString();
+                     animal.Peso = Convert.ToDecimal(worksheet.Cells[linha, 3].Value);
+                     animal.ChipRastreador = worksheet.Cells[linha, 4].Value?.ToString();
 
-                    catch (Exception ex)
-                    {
-                        throw;
-                    }
                     if (animal.ChipRastreador != null)
                         animais.Add(animal);
                 }
@@ -105,7 +98,8 @@ namespace Importacao.Actions
                 animal.Especie = animal.Especie?.Trim();
                 animal.ChipRastreador = animal.ChipRastreador?.Trim();
                 string cpf = animal.IdPessoa?.Replace("-", "").Replace(".", "").Replace(@"\", "");
-                animal.IdPessoa = SavePessoas.GetId(cpf);
+                //var salvarPessoas = new SalvarPessoas(_db);
+                //animal.IdPessoa = salvarPessoas.PegaId(cpf);
             }
             return animais;
         }

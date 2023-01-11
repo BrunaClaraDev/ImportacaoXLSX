@@ -1,3 +1,6 @@
+using Importacao.Actions;
+using Importacao.Dados;
+using Importacao.Servicos;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -26,6 +29,9 @@ namespace Importacao
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Importacao", Version = "v1" });
             });
+            services.AddScoped<ISalvarAnimais, SalvarAnimais>();
+            services.AddScoped<ISalvarPessoas, SalvarPessoas>();
+            services.AddScoped<DbSession>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
