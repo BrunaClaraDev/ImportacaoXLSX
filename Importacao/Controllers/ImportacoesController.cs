@@ -38,5 +38,18 @@ namespace Importacao.Controllers
 
             return Ok();
         }
+
+        [Consumes("multipart/form-data")]
+        [HttpPost("Importa-AnimaisEPessoas-XLSX")]
+        public ActionResult ImportaAnimaisEPessoas(IFormFile arquivo)
+        {
+            var arquivoStream = Converter.LerStream(arquivo);
+            var pessoas = LerExcel.LerPessoas(arquivoStream);
+            SavePessoas.Salvar(pessoas);
+            var animais = LerExcel.LerAnimais(arquivoStream);
+            SaveAnimais.Salvar(animais);
+            
+            return Ok();
+        }
     }
 }

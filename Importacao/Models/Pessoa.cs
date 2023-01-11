@@ -9,7 +9,9 @@ namespace Importacao.Models
         [ExplicitKey]
         public string Id { get; set; }
         public string Nome { get; set; }
-        public decimal Email { get; set; }
+        public string CPF { get; set; }
+        public string CEP { get; set; }
+        public string Telefone { get; set; }
         public DateTime DataCriacao { get; set; }
     }
 }

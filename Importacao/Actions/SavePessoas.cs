@@ -8,15 +8,27 @@ namespace Importacao.Actions
 {
     public class SavePessoas
     {
-        public static bool GetNome(Pessoa pessoa)
+        public static bool ExistePessoa(Pessoa pessoa)
         {
             var pessoaExiste = new Pessoa();
             using (var connection = new SqlConnection("Server=.\\sqlexpress;Database=TestesImportacao;Trusted_Connection=True;"))
             {
-                pessoaExiste = connection.QueryFirstOrDefault<Pessoa>(" SELECT P.Nome ,P.DataCriacao,P.Id,P.Email FROM TestesImportacao.dbo.Pessoas P where UPPER (P.Nome) = '" + pessoa.Nome + "'");
+                pessoaExiste = connection.QueryFirstOrDefault<Pessoa>(" SELECT P.CPF FROM TestesImportacao.dbo.Pessoas P where P.CPF = '" + pessoa.CPF + "'");
                 if (pessoaExiste != null)
                     return true;
                 return false;
+            }
+        }
+
+        public static string GetId(string cpf)
+        {
+            var pessoaExiste = new Pessoa();
+            using (var connection = new SqlConnection("Server=.\\sqlexpress;Database=TestesImportacao;Trusted_Connection=True;"))
+            {
+                pessoaExiste = connection.QueryFirstOrDefault<Pessoa>(" SELECT P.CPF, P.Id FROM TestesImportacao.dbo.Pessoas P where P.CPF = '" + cpf + "'");
+                if (pessoaExiste != null)
+                    return pessoaExiste.Id;
+                return null;
             }
         }
 
@@ -26,9 +38,8 @@ namespace Importacao.Actions
             {
                 if (pessoa.Nome != null)
                 {
-                    var email = pessoa.Email.ToString().Replace(',', '.');
                     var pessoaAtualizada = connection.QueryFirstOrDefault<Pessoa>(" UPDATE Pessoas SET DataCriacao = '" + pessoa.DataCriacao
-                        + "', Email = " + email + " WHERE Nome = '" + pessoa.Nome + "'");
+                        + "', CEP = '" + pessoa.CEP + "', Telefone = '"+ pessoa.Telefone +"', Nome = '"+ pessoa.Nome +"' WHERE CPF = '" + pessoa.CPF + "'");
                 }
             }
         }
@@ -39,7 +50,7 @@ namespace Importacao.Actions
             {
                 foreach (Pessoa pessoa in pessoas)
                 {
-                    var existe = GetNome(pessoa);
+                    var existe = ExistePessoa(pessoa);
                     if (existe == false)
                         connection.Insert(pessoa);
                     else
