@@ -12,12 +12,6 @@ namespace Importacao.Actions
 {
     public class LerExcel
     {
-        private DbSession _db;
-        private ISalvarPessoas _salvarPessoas;
-        public LerExcel(ISalvarPessoas salvarPessoas)
-        {
-            _salvarPessoas = salvarPessoas;
-        }
         public static List<Pessoa> LerPessoas(MemoryStream stream)
         {
             var pessoas = new List<Pessoa>();
@@ -72,7 +66,7 @@ namespace Importacao.Actions
                 ExcelWorksheet worksheet = pacote.Workbook.Worksheets[0];
                 int colunaCont = worksheet.Dimension.End.Column;
                 int linhaCont = worksheet.Dimension.End.Row;
-
+                
 
                 for (int linha = 2; linha <= linhaCont; linha++)
                 {
@@ -82,32 +76,26 @@ namespace Importacao.Actions
                         if (worksheet.Cells[1, coluna].Value?.ToString() == "CPF")
                             animal.IdPessoa = worksheet.Cells[linha, coluna].Value?.ToString();
                     }
-
-                    animal.IdAnimal = Guid.NewGuid().ToString("N");
-                    animal.DataCriacao = DateTime.Now;
-                    animal.Nome = worksheet.Cells[linha, 1].Value?.ToString();
-                    animal.Especie = worksheet.Cells[linha, 2].Value?.ToString();
-                    animal.Peso = Convert.ToDecimal(worksheet.Cells[linha, 3].Value);
-                    animal.ChipRastreador = worksheet.Cells[linha, 4].Value?.ToString();
+                    
+                     animal.IdAnimal = Guid.NewGuid().ToString("N");
+                     animal.DataCriacao = DateTime.Now;
+                     animal.Nome = worksheet.Cells[linha, 1].Value?.ToString();
+                     animal.Especie = worksheet.Cells[linha, 2].Value?.ToString();
+                     animal.Peso = Convert.ToDecimal(worksheet.Cells[linha, 3].Value);
+                     animal.ChipRastreador = worksheet.Cells[linha, 4].Value?.ToString();
 
                     if (animal.ChipRastreador != null)
                         animais.Add(animal);
                 }
             }
-            //NewMethod(animais);
-            return animais;
-        }
-
-        private void NewMethod(List<Animais> animais)
-        {
             foreach (Animais animal in animais)
             {
                 animal.Nome = animal.Nome?.Trim();
                 animal.Especie = animal.Especie?.Trim();
                 animal.ChipRastreador = animal.ChipRastreador?.Trim();
-                string cpf = animal.IdPessoa?.Replace("-", "").Replace(".", "").Replace(@"\", "");
-                animal.IdPessoa = _salvarPessoas.PegaId(cpf);
+                animal.IdPessoa = animal.IdPessoa?.Replace("-", "").Replace(".", "").Replace(@"\", "");
             }
+            return animais;
         }
     }
 }

@@ -27,17 +27,6 @@ namespace Importacao.Actions
             }
         }
 
-        public string PegaId(string cpf)
-        {
-            using (var con = _db.Connection)
-            {
-                var pessoaExiste = con.QueryFirstOrDefault<Pessoa>(" SELECT P.CPF, P.Id FROM TestesImportacao.dbo.Pessoas P where P.CPF = @cpf", new { cpf = cpf });
-                if (pessoaExiste != null)
-                    return pessoaExiste.Id;
-                return null;
-            }
-        }
-
         public void Atualizar(Pessoa pessoa)
         {
             using (var con = _db.Connection)
@@ -67,11 +56,6 @@ namespace Importacao.Actions
                         Atualizar(pessoa);
                 }
             }
-        }
-
-        public  string VerificaId(string cpf)
-        {
-            return PegaId(cpf);
         }
     }
 }

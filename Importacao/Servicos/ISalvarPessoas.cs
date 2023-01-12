@@ -10,8 +10,6 @@ namespace Importacao.Servicos
     {
         public void Salvar(List<Pessoa> pessoas);
         public void Atualizar(Pessoa pessoa);
-        public string PegaId(string cpf);
         public bool ExistePessoa(Pessoa pessoa);
-        public string VerificaId(string cpf);
     }
 }
