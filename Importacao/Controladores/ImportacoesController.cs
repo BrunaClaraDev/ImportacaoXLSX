@@ -56,7 +56,7 @@ namespace Importacao.Controllers
             catch (Exception ex)
             {
                 _logger.LogInformation(ex.Message);
-                return StatusCode(500, "Erro Interno De Servidor");
+                return StatusCode(500, ex.Message); ;
             }
         }
 
@@ -77,7 +77,7 @@ namespace Importacao.Controllers
             catch (Exception ex)
             {
                 _logger.LogInformation(ex.Message);
-                return StatusCode(500, "Erro Interno De Servidor");
+                return StatusCode(500, ex.Message);
             }
         }
     }

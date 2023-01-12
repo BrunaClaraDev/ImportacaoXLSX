@@ -68,5 +68,10 @@ namespace Importacao.Actions
                 }
             }
         }
+
+        public  string VerificaId(string cpf)
+        {
+            return PegaId(cpf);
+        }
     }
 }
