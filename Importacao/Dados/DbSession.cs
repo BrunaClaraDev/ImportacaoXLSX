@@ -1,16 +1,13 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Importacao.Dados
 {
     public class DbSession : IDisposable
     {
-        public IDbConnection Connection { get; }
+        public SqlConnection Connection { get; set; }
 
         public DbSession(IConfiguration configuration)
         {
@@ -18,6 +15,10 @@ namespace Importacao.Dados
                      .GetConnectionString("DefaultConnection"));
             Connection.Open();
         }
-        public void Dispose() => Connection?.Dispose();
+        public void Dispose()
+        {
+            if (Connection.State != ConnectionState.Closed)
+                Connection.Close();
+        }
     }
 }

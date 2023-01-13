@@ -1,8 +1,5 @@
 ﻿using Importacao.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Importacao.Servicos
 {
@@ -10,6 +7,6 @@ namespace Importacao.Servicos
     {
         public void Salvar(List<Pessoa> pessoas);
         public void Atualizar(Pessoa pessoa);
-        public bool ExistePessoa(Pessoa pessoa);
+        public bool ExistePessoa(string cpf);
     }
 }

@@ -1,12 +1,8 @@
-﻿using Importacao.Dados;
-using Importacao.Models;
-using Importacao.Servicos;
+﻿using Importacao.Models;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using Xceed.Wpf.Toolkit;
 
 namespace Importacao.Actions
 {
@@ -23,11 +19,17 @@ namespace Importacao.Actions
                 ExcelWorksheet worksheet = pacote.Workbook.Worksheets[0];
                 int colunaCont = worksheet.Dimension.End.Column;
                 int linhaCont = worksheet.Dimension.End.Row;
-                int posicao = 1;
+                int posCPF = colunaCont + 1, posNome = colunaCont + 1, posCEP = colunaCont + 1, posTelefone = colunaCont + 1;
                 for (int coluna = 1; coluna <= colunaCont; coluna++)
                 {
                     if (worksheet.Cells[1, coluna].Value?.ToString() == "NomePessoa")
-                        posicao = coluna;
+                        posNome = coluna;
+                    if (worksheet.Cells[1, coluna].Value?.ToString() == "CPF")
+                        posCPF = coluna;
+                    if (worksheet.Cells[1, coluna].Value?.ToString() == "CEP")
+                        posCEP = coluna;
+                    if (worksheet.Cells[1, coluna].Value?.ToString() == "Telefone")
+                        posTelefone = coluna;
                 }
 
                 for (int linha = 2; linha <= linhaCont; linha++)
@@ -36,10 +38,10 @@ namespace Importacao.Actions
 
                     pessoa.Id = Guid.NewGuid().ToString("N");
                     pessoa.DataCriacao = DateTime.Now;
-                    pessoa.Nome = worksheet.Cells[linha, posicao].Value?.ToString();
-                    pessoa.CPF = worksheet.Cells[linha, posicao + 1].Value?.ToString();
-                    pessoa.Telefone = worksheet.Cells[linha, posicao + 2].Value?.ToString();
-                    pessoa.CEP = worksheet.Cells[linha, posicao + 3].Value?.ToString();
+                    pessoa.Nome = worksheet.Cells[linha, posNome].Value?.ToString();
+                    pessoa.CPF = worksheet.Cells[linha, posCPF].Value?.ToString();
+                    pessoa.Telefone = worksheet.Cells[linha, posTelefone].Value?.ToString();
+                    pessoa.CEP = worksheet.Cells[linha, posCEP].Value?.ToString();
 
                     if(pessoa.CPF != null)
                         pessoas.Add(pessoa);
@@ -71,18 +73,28 @@ namespace Importacao.Actions
                 for (int linha = 2; linha <= linhaCont; linha++)
                 {
                     var animal = new Animais();
+                    int posCPF = colunaCont + 1, posNome = colunaCont + 1, posPeso = colunaCont + 1, posEspecie = colunaCont + 1, posChip = colunaCont + 1;
                     for (int coluna = 1; coluna <= colunaCont; coluna++)
                     {
                         if (worksheet.Cells[1, coluna].Value?.ToString() == "CPF")
-                            animal.IdPessoa = worksheet.Cells[linha, coluna].Value?.ToString();
+                            posCPF = coluna;
+                        if (worksheet.Cells[1, coluna].Value?.ToString() == "NomeAnimal")
+                            posNome = coluna;
+                        if (worksheet.Cells[1, coluna].Value?.ToString() == "Especie")
+                            posEspecie = coluna;
+                        if (worksheet.Cells[1, coluna].Value?.ToString() == "Peso")
+                            posPeso = coluna;
+                        if (worksheet.Cells[1, coluna].Value?.ToString() == "ChipRastreador")
+                            posChip = coluna;
                     }
                     
                      animal.IdAnimal = Guid.NewGuid().ToString("N");
                      animal.DataCriacao = DateTime.Now;
-                     animal.Nome = worksheet.Cells[linha, 1].Value?.ToString();
-                     animal.Especie = worksheet.Cells[linha, 2].Value?.ToString();
-                     animal.Peso = Convert.ToDecimal(worksheet.Cells[linha, 3].Value);
-                     animal.ChipRastreador = worksheet.Cells[linha, 4].Value?.ToString();
+                     animal.Nome = worksheet.Cells[linha, posNome].Value?.ToString();
+                     animal.Especie = worksheet.Cells[linha, posEspecie].Value?.ToString();
+                     animal.Peso = Convert.ToDecimal(worksheet.Cells[linha, posPeso].Value);
+                     animal.ChipRastreador = worksheet.Cells[linha, posChip].Value?.ToString();
+                     animal.IdPessoa = worksheet.Cells[linha, posCPF].Value?.ToString();
 
                     if (animal.ChipRastreador != null)
                         animais.Add(animal);

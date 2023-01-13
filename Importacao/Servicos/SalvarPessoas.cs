@@ -1,60 +1,61 @@
 ﻿using Dapper;
-using Dapper.Contrib.Extensions;
 using Importacao.Dados;
 using Importacao.Models;
 using Importacao.Servicos;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 
 namespace Importacao.Actions
 {
     public class SalvarPessoas : ISalvarPessoas
     {
-        private DbSession _db;
+        private readonly DbSession _db;
         public SalvarPessoas(DbSession dbSession)
         {
             _db = dbSession;
         }
 
-        public bool ExistePessoa(Pessoa pessoa)
+        public bool ExistePessoa(string cpf)
         {
-            using (var con = _db.Connection)
-            {
-                var pessoaExiste = con.QueryFirstOrDefault<Pessoa>(" SELECT P.CPF FROM TestesImportacao.dbo.Pessoas P where P.CPF = @cpf", new { cpf = pessoa.CPF});
-                if (pessoaExiste != null)
-                    return true;
-                return false;
-            }
+            var pessoaExiste = _db.Connection.QueryFirstOrDefault<Pessoa>(" SELECT P.CPF FROM TestesImportacao.dbo.Pessoas P where P.CPF = @cpf", new { cpf = cpf});
+            if (pessoaExiste != null)
+                return true;
+            return false;
         }
 
         public void Atualizar(Pessoa pessoa)
         {
-            using (var con = _db.Connection)
+            if (pessoa.Nome != null)
             {
-                if (pessoa.Nome != null)
-                {
-                    var pessoaAtualizada = con.QueryFirstOrDefault<Pessoa>(" UPDATE Pessoas SET DataCriacao = @data, CEP = @cep, Telefone = @telefone, Nome = @nome WHERE CPF = @cpf",
-                        new {data = pessoa.DataCriacao,
-                             cep = pessoa.CEP,
-                             telefone = pessoa.Telefone,
-                             nome = pessoa.Nome,
-                             cpf = pessoa.CPF});
-                }
+                    var pessoaAtualizada = _db.Connection.QueryFirstOrDefault<Pessoa>(" UPDATE Pessoas SET DataCriacao = @data, CEP = @cep, Telefone = @telefone, Nome = @nome WHERE CPF = @cpf",
+                    new{
+                        data = pessoa.DataCriacao,
+                        cep = pessoa.CEP,
+                        telefone = pessoa.Telefone,
+                        nome = pessoa.Nome,
+                        cpf = pessoa.CPF
+                     });
             }
         }
 
         public void Salvar(List<Pessoa> pessoas)
         {
-            using (var con = _db.Connection)
+            foreach (Pessoa pessoa in pessoas)
             {
-                foreach (Pessoa pessoa in pessoas)
+                var existe = ExistePessoa(pessoa.CPF);
+                if (existe == false)
                 {
-                    var existe = ExistePessoa(pessoa);
-                    if (existe == false)
-                        con.Insert(pessoa);
-                    else
-                        Atualizar(pessoa);
+                    var pessoaSalva = _db.Connection.QueryFirstOrDefault<Pessoa>(" INSERT INTO TestesImportacao.dbo.Pessoas (Id, Nome, DataCriacao, CPF, CEP, Telefone) VALUES (@id, @nome, @data, @cpf, @cep,  @telefone);",
+                        new{
+                            id = pessoa.Id,
+                            nome = pessoa.Nome,
+                            data = pessoa.DataCriacao,
+                            cpf = pessoa.CPF,
+                            cep = pessoa.CEP,
+                            telefone = pessoa.Telefone
+                        });
                 }
+                else
+                    Atualizar(pessoa);
             }
         }
     }

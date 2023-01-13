@@ -1,19 +1,14 @@
 ﻿using Dapper;
-using Dapper.Contrib.Extensions;
 using Importacao.Dados;
 using Importacao.Models;
 using Importacao.Servicos;
-using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Importacao.Actions
 {
     public class SalvarAnimais : ISalvarAnimais
     {
-        private DbSession _db;
+        private readonly DbSession _db;
         public SalvarAnimais(DbSession dbSession)
         {
             _db = dbSession;
@@ -21,63 +16,59 @@ namespace Importacao.Actions
 
         public string PegaIdPessoa(string cpf)
         {
-            using (var con = _db.Connection)
-            {
-                var pessoaExiste = con.QueryFirstOrDefault<Pessoa>(" SELECT P.CPF, P.Id FROM TestesImportacao.dbo.Pessoas P where P.CPF = @cpf", new { cpf = cpf });
-                if (pessoaExiste != null)
-                    return pessoaExiste.Id;
-                return null;
-            }
+            var pessoaExiste = _db.Connection.QueryFirstOrDefault<Pessoa>(" SELECT P.CPF, P.Id FROM TestesImportacao.dbo.Pessoas P where P.CPF = @cpf", new { cpf = cpf });
+            if (pessoaExiste != null)
+                return pessoaExiste.Id;
+            return null;
         }
 
-        public bool ExisteAnimal(Animais animal)
+        public bool ExisteAnimal(string chip)
         {
-            var animalExiste = new Animais();
-            using (var con = _db.Connection)
-            {
-                animalExiste = con.QueryFirstOrDefault<Animais>(" SELECT A.ChipRastreador FROM TestesImportacao.dbo.Animais A where A.ChipRastreador = @chip", new { chip = animal.ChipRastreador});
-                if (animalExiste != null)
-                    return true;
-                return false;
-            }
+            var animalExiste = _db.Connection.QueryFirstOrDefault<Animais>(" SELECT A.ChipRastreador FROM TestesImportacao.dbo.Animais A where A.ChipRastreador = @chip", new { chip = chip});
+            if (animalExiste != null)
+                return true;
+            return false;
         }
 
         public void Atualizar(Animais animal)
         {
-            using (var con = _db.Connection)
+            if (animal.Nome != null)
             {
-                if (animal.Nome != null)
-                {
-                    var idPessoa = "";
-                    if (animal.IdPessoa != null)
-                        idPessoa = animal.IdPessoa;
-                    else
-                        idPessoa = null;
-                    var peso = animal.Peso.ToString().Replace(',', '.');
-                    var pessoaAtualizada = con.QueryFirstOrDefault<Pessoa>("UPDATE Animais SET DataCriacao = @data, Nome = @nome, Especie = @especie, Peso = @peso, IdPessoa = @id WHERE ChipRastreador = @chip", 
-                        new {data =animal.DataCriacao,
-                             nome = animal.Nome,
-                             especie = animal.Especie,
-                             peso = animal.Peso,
-                             chip = animal.ChipRastreador,
-                             id = idPessoa});
-                }
+                var peso = animal.Peso.ToString().Replace(',', '.');
+                var pessoaAtualizada = _db.Connection.QueryFirstOrDefault<Pessoa>("UPDATE Animais SET DataCriacao = @data, Nome = @nome, Especie = @especie, Peso = @peso, IdPessoa = @id WHERE ChipRastreador = @chip",
+                    new{
+                        data = animal.DataCriacao,
+                        nome = animal.Nome,
+                        especie = animal.Especie,
+                        peso = animal.Peso,
+                        chip = animal.ChipRastreador,
+                        id = animal.IdPessoa
+                    });
             }
         }
 
         public void Salvar(List<Animais> animais)
         {
-            using (var con = _db.Connection)
+            foreach (Animais animal in animais)
             {
-                foreach (Animais animal in animais)
+                animal.IdPessoa = PegaIdPessoa(animal.IdPessoa);
+                var existe = ExisteAnimal(animal.ChipRastreador);
+                if (existe == false)
                 {
-                    animal.IdPessoa = PegaIdPessoa(animal.IdPessoa);
-                    var existe = ExisteAnimal(animal);
-                    if (existe == false)
-                        con.Insert(animal);
-                    else
-                        Atualizar(animal);
+                    var animalSalvo = _db.Connection.QueryFirstOrDefault<Pessoa>(" INSERT INTO TestesImportacao.dbo.Animais (IdAnimal, IdPessoa, Nome, DataCriacao, Especie, ChipRastreador, Peso) VALUES (@idAnimal, @idPessoa, @nome, @data, @especie, @chip,  @peso);",
+                        new
+                        {
+                            idAnimal = animal.IdAnimal,
+                            idPessoa = animal.IdPessoa,
+                            nome = animal.Nome,
+                            data = animal.DataCriacao,
+                            especie = animal.Especie,
+                            chip = animal.ChipRastreador,
+                            peso = animal.Peso
+                        });
                 }
+                else
+                    Atualizar(animal);
             }
         }
     }
