@@ -1,15 +1,15 @@
 ﻿using Dapper;
 using Importacao.Dados;
 using Importacao.Models;
-using Importacao.Servicos;
+using Importacao.Repositorio;
 using System.Collections.Generic;
 
 namespace Importacao.Actions
 {
-    public class SalvarAnimais : ISalvarAnimais
+    public class AnimaisRepositorio : IAnimaisRepositorio
     {
-        private readonly DbSession _db;
-        public SalvarAnimais(DbSession dbSession)
+        private readonly DbSessao _db;
+        public AnimaisRepositorio(DbSessao dbSession)
         {
             _db = dbSession;
         }
@@ -24,7 +24,7 @@ namespace Importacao.Actions
 
         public bool ExisteAnimal(string chip)
         {
-            var animalExiste = _db.Connection.QueryFirstOrDefault<Animais>(" SELECT A.ChipRastreador FROM TestesImportacao.dbo.Animais A where A.ChipRastreador = @chip", new { chip = chip});
+            var animalExiste = _db.Connection.QueryFirstOrDefault<Animais>(" SELECT A.ChipRastreador FROM TestesImportacao.dbo.Animais A where A.ChipRastreador = @chip", new { chip = chip });
             if (animalExiste != null)
                 return true;
             return false;
@@ -36,7 +36,8 @@ namespace Importacao.Actions
             {
                 var peso = animal.Peso.ToString().Replace(',', '.');
                 var pessoaAtualizada = _db.Connection.QueryFirstOrDefault<Pessoa>("UPDATE Animais SET DataCriacao = @data, Nome = @nome, Especie = @especie, Peso = @peso, IdPessoa = @id WHERE ChipRastreador = @chip",
-                    new{
+                    new
+                    {
                         data = animal.DataCriacao,
                         nome = animal.Nome,
                         especie = animal.Especie,

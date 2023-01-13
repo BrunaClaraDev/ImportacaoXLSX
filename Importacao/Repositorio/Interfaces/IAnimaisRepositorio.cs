@@ -1,9 +1,9 @@
 ﻿using Importacao.Models;
 using System.Collections.Generic;
 
-namespace Importacao.Servicos
+namespace Importacao.Repositorio
 {
-    public interface ISalvarAnimais
+    public interface IAnimaisRepositorio
     {
         public string PegaIdPessoa(string cpf);
         public bool ExisteAnimal(string chip);

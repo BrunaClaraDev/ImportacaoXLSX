@@ -1,5 +1,5 @@
 ﻿using Importacao.Actions;
-using Importacao.Servicos;
+using Importacao.Repositorio;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -12,14 +12,14 @@ namespace Importacao.Controllers
     public class ImportacoesController : ControllerBase
     {
         private readonly ILogger<ImportacoesController> _logger;
-        private readonly ISalvarAnimais _salvarAnimais;
-        private readonly ISalvarPessoas _salvarPessoas;
+        private readonly IAnimaisRepositorio _animaisRepositorio;
+        private readonly IPessoasRepositorio _pessoasRepositorio;
 
-        public ImportacoesController(ILogger<ImportacoesController> logger, ISalvarAnimais salvarAnimais, ISalvarPessoas salvarPessoas)
+        public ImportacoesController(ILogger<ImportacoesController> logger, IAnimaisRepositorio animaisRepositorio, IPessoasRepositorio pessoasRepositorio)
         {
             _logger = logger;
-            _salvarAnimais = salvarAnimais;
-            _salvarPessoas = salvarPessoas;
+            _animaisRepositorio = animaisRepositorio;
+            _pessoasRepositorio = pessoasRepositorio;
         }
 
         [Consumes("multipart/form-data")]
@@ -30,7 +30,7 @@ namespace Importacao.Controllers
             {
                 var arquivoStream = Converter.LerStream(arquivo);
                 var pessoas = LerExcel.LerPessoas(arquivoStream);
-                _salvarPessoas.Salvar(pessoas);
+                _pessoasRepositorio.Salvar(pessoas);
 
                 return Ok();
             }
@@ -49,7 +49,7 @@ namespace Importacao.Controllers
             {
                 var arquivoStream = Converter.LerStream(arquivo);
                 var animais = LerExcel.LerAnimais(arquivoStream);
-                _salvarAnimais.Salvar(animais);
+                _animaisRepositorio.Salvar(animais);
 
                 return Ok();
             }
@@ -68,9 +68,9 @@ namespace Importacao.Controllers
             {
                 var arquivoStream = Converter.LerStream(arquivo);
                 var pessoas = LerExcel.LerPessoas(arquivoStream);
-                _salvarPessoas.Salvar(pessoas);
+                _pessoasRepositorio.Salvar(pessoas);
                 var animais = LerExcel.LerAnimais(arquivoStream);
-                _salvarAnimais.Salvar(animais);
+                _animaisRepositorio.Salvar(animais);
 
                 return Ok();
             }

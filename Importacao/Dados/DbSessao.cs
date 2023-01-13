@@ -5,11 +5,11 @@ using System.Data.SqlClient;
 
 namespace Importacao.Dados
 {
-    public class DbSession : IDisposable
+    public class DbSessao : IDisposable
     {
         public SqlConnection Connection { get; set; }
 
-        public DbSession(IConfiguration configuration)
+        public DbSessao(IConfiguration configuration)
         {
             Connection = new SqlConnection(configuration
                      .GetConnectionString("DefaultConnection"));
