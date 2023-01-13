@@ -2,7 +2,9 @@
 using Importacao.Dados;
 using Importacao.Models;
 using Importacao.Repositorio;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Importacao.Actions
 {
@@ -14,7 +16,7 @@ namespace Importacao.Actions
             _db = dbSession;
         }
 
-        public string PegaIdPessoa(string cpf)
+        public async Task<string> PegaIdPessoaAsync(string cpf)
         {
             var pessoaExiste = _db.Connection.QueryFirstOrDefault<Pessoa>(" SELECT P.CPF, P.Id FROM TestesImportacao.dbo.Pessoas P where P.CPF = @cpf", new { cpf = cpf });
             if (pessoaExiste != null)
@@ -22,7 +24,7 @@ namespace Importacao.Actions
             return null;
         }
 
-        public bool ExisteAnimal(string chip)
+        public async Task<bool> ExisteAnimalAsync(string chip)
         {
             var animalExiste = _db.Connection.QueryFirstOrDefault<Animais>(" SELECT A.ChipRastreador FROM TestesImportacao.dbo.Animais A where A.ChipRastreador = @chip", new { chip = chip });
             if (animalExiste != null)
@@ -30,7 +32,7 @@ namespace Importacao.Actions
             return false;
         }
 
-        public void Atualizar(Animais animal)
+        public async Task AtualizarAsync(Animais animal)
         {
             if (animal.Nome != null)
             {
@@ -48,15 +50,15 @@ namespace Importacao.Actions
             }
         }
 
-        public void Salvar(List<Animais> animais)
+        public async Task SalvarAsync(List<Animais> animais)
         {
             foreach (Animais animal in animais)
             {
-                animal.IdPessoa = PegaIdPessoa(animal.IdPessoa);
-                var existe = ExisteAnimal(animal.ChipRastreador);
+                animal.IdPessoa = await PegaIdPessoaAsync(animal.IdPessoa);
+                var existe = await ExisteAnimalAsync(animal.ChipRastreador);
                 if (existe == false)
                 {
-                    var animalSalvo = _db.Connection.QueryFirstOrDefault<Pessoa>(" INSERT INTO TestesImportacao.dbo.Animais (IdAnimal, IdPessoa, Nome, DataCriacao, Especie, ChipRastreador, Peso) VALUES (@idAnimal, @idPessoa, @nome, @data, @especie, @chip,  @peso);",
+                    var animalSalvo =  _db.Connection.QueryFirstOrDefault<Pessoa>(" INSERT INTO TestesImportacao.dbo.Animais (IdAnimal, IdPessoa, Nome, DataCriacao, Especie, ChipRastreador, Peso) VALUES (@idAnimal, @idPessoa, @nome, @data, @especie, @chip,  @peso);",
                         new
                         {
                             idAnimal = animal.IdAnimal,
@@ -69,7 +71,7 @@ namespace Importacao.Actions
                         });
                 }
                 else
-                    Atualizar(animal);
+                    await AtualizarAsync(animal);
             }
         }
     }

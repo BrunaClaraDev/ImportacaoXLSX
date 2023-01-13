@@ -68,25 +68,24 @@ namespace Importacao.Actions
                 ExcelWorksheet worksheet = pacote.Workbook.Worksheets[0];
                 int colunaCont = worksheet.Dimension.End.Column;
                 int linhaCont = worksheet.Dimension.End.Row;
-                
+                int posCPF = colunaCont + 1, posNome = colunaCont + 1, posPeso = colunaCont + 1, posEspecie = colunaCont + 1, posChip = colunaCont + 1;
+                for (int coluna = 1; coluna <= colunaCont; coluna++)
+                {
+                    if (worksheet.Cells[1, coluna].Value?.ToString() == "CPF")
+                        posCPF = coluna;
+                    if (worksheet.Cells[1, coluna].Value?.ToString() == "NomeAnimal")
+                        posNome = coluna;
+                    if (worksheet.Cells[1, coluna].Value?.ToString() == "Especie")
+                        posEspecie = coluna;
+                    if (worksheet.Cells[1, coluna].Value?.ToString() == "Peso")
+                        posPeso = coluna;
+                    if (worksheet.Cells[1, coluna].Value?.ToString() == "ChipRastreador")
+                        posChip = coluna;
+                }
 
                 for (int linha = 2; linha <= linhaCont; linha++)
                 {
                     var animal = new Animais();
-                    int posCPF = colunaCont + 1, posNome = colunaCont + 1, posPeso = colunaCont + 1, posEspecie = colunaCont + 1, posChip = colunaCont + 1;
-                    for (int coluna = 1; coluna <= colunaCont; coluna++)
-                    {
-                        if (worksheet.Cells[1, coluna].Value?.ToString() == "CPF")
-                            posCPF = coluna;
-                        if (worksheet.Cells[1, coluna].Value?.ToString() == "NomeAnimal")
-                            posNome = coluna;
-                        if (worksheet.Cells[1, coluna].Value?.ToString() == "Especie")
-                            posEspecie = coluna;
-                        if (worksheet.Cells[1, coluna].Value?.ToString() == "Peso")
-                            posPeso = coluna;
-                        if (worksheet.Cells[1, coluna].Value?.ToString() == "ChipRastreador")
-                            posChip = coluna;
-                    }
                     
                      animal.IdAnimal = Guid.NewGuid().ToString("N");
                      animal.DataCriacao = DateTime.Now;

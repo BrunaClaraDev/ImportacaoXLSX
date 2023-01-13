@@ -3,6 +3,7 @@ using Importacao.Dados;
 using Importacao.Models;
 using Importacao.Repositorio;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Importacao.Actions
 {
@@ -14,7 +15,7 @@ namespace Importacao.Actions
             _db = dbSession;
         }
 
-        public bool ExistePessoa(string cpf)
+        public async Task<bool> ExistePessoaAsync(string cpf)
         {
             var pessoaExiste = _db.Connection.QueryFirstOrDefault<Pessoa>(" SELECT P.CPF FROM TestesImportacao.dbo.Pessoas P where P.CPF = @cpf", new { cpf = cpf });
             if (pessoaExiste != null)
@@ -22,7 +23,7 @@ namespace Importacao.Actions
             return false;
         }
 
-        public void Atualizar(Pessoa pessoa)
+        public async Task AtualizarAsync(Pessoa pessoa)
         {
             if (pessoa.Nome != null)
             {
@@ -38,11 +39,11 @@ namespace Importacao.Actions
             }
         }
 
-        public void Salvar(List<Pessoa> pessoas)
+        public async Task SalvarAsync(List<Pessoa> pessoas)
         {
             foreach (Pessoa pessoa in pessoas)
             {
-                var existe = ExistePessoa(pessoa.CPF);
+                var existe = await ExistePessoaAsync(pessoa.CPF);
                 if (existe == false)
                 {
                     var pessoaSalva = _db.Connection.QueryFirstOrDefault<Pessoa>(" INSERT INTO TestesImportacao.dbo.Pessoas (Id, Nome, DataCriacao, CPF, CEP, Telefone) VALUES (@id, @nome, @data, @cpf, @cep,  @telefone);",
@@ -57,7 +58,7 @@ namespace Importacao.Actions
                         });
                 }
                 else
-                    Atualizar(pessoa);
+                    await AtualizarAsync(pessoa);
             }
         }
     }

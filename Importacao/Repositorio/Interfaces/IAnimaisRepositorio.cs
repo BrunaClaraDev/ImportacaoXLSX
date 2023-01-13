@@ -1,13 +1,14 @@
 ﻿using Importacao.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Importacao.Repositorio
 {
     public interface IAnimaisRepositorio
     {
-        public string PegaIdPessoa(string cpf);
-        public bool ExisteAnimal(string chip);
-        public void Salvar(List<Animais> animais);
-        public void Atualizar(Animais animal);
+        public Task<string> PegaIdPessoaAsync(string cpf);
+        public Task <bool> ExisteAnimalAsync(string chip);
+        public Task SalvarAsync(List<Animais> animais);
+        public Task AtualizarAsync(Animais animal);
     }
 }
