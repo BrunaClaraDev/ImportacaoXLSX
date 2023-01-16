@@ -37,7 +37,7 @@ namespace Importacao.Actions
             if (animal.Nome != null)
             {
                 var peso = animal.Peso.ToString().Replace(',', '.');
-                var pessoaAtualizada = _db.Connection.QueryFirstOrDefault<Pessoa>("UPDATE Animais SET DataCriacao = @data, Nome = @nome, Especie = @especie, Peso = @peso, IdPessoa = @id WHERE ChipRastreador = @chip",
+                var pessoaAtualizada = _db.Connection.QueryFirstOrDefault<Animais>("UPDATE Animais SET DataCriacao = @data, Nome = @nome, Especie = @especie, Peso = @peso, IdPessoa = @id WHERE ChipRastreador = @chip",
                     new
                     {
                         data = animal.DataCriacao,
@@ -58,7 +58,7 @@ namespace Importacao.Actions
                 var existe = await ExisteAnimalAsync(animal.ChipRastreador);
                 if (existe == false)
                 {
-                    var animalSalvo =  _db.Connection.QueryFirstOrDefault<Pessoa>(" INSERT INTO TestesImportacao.dbo.Animais (IdAnimal, IdPessoa, Nome, DataCriacao, Especie, ChipRastreador, Peso) VALUES (@idAnimal, @idPessoa, @nome, @data, @especie, @chip,  @peso);",
+                    var animalSalvo =  _db.Connection.QueryFirstOrDefault<Animais>(" INSERT INTO TestesImportacao.dbo.Animais (IdAnimal, IdPessoa, Nome, DataCriacao, Especie, ChipRastreador, Peso) VALUES (@idAnimal, @idPessoa, @nome, @data, @especie, @chip,  @peso);",
                         new
                         {
                             idAnimal = animal.IdAnimal,
@@ -71,7 +71,7 @@ namespace Importacao.Actions
                         });
                 }
                 else
-                    await AtualizarAsync(animal);
+                     await AtualizarAsync(animal);
             }
         }
     }
