@@ -2,7 +2,11 @@
 using Importacao.Dados;
 using Importacao.Models;
 using Importacao.Repositorio;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Importacao.Actions
@@ -10,56 +14,77 @@ namespace Importacao.Actions
     public class PessoasRepositorio : IPessoasRepositorio
     {
         private readonly DbSessao _db;
-        public PessoasRepositorio(DbSessao dbSession)
+        private readonly int ErroPrimaryKey = 2601;
+        private readonly int ErroForeignKey = 547;
+        private readonly ILogger<PessoasRepositorio> _logger;
+        public PessoasRepositorio(DbSessao dbSession, ILogger<PessoasRepositorio> logger)
         {
             _db = dbSession;
-        }
-
-        public async Task<bool> ExistePessoaAsync(string cpf)
-        {
-            var pessoaExiste = _db.Connection.QueryFirstOrDefault<Pessoa>(" SELECT P.CPF FROM TestesImportacao.dbo.Pessoas P where P.CPF = @cpf", new { cpf = cpf });
-            if (pessoaExiste != null)
-                return true;
-            return false;
-        }
-
-        public async Task AtualizarAsync(Pessoa pessoa)
-        {
-            if (pessoa.Nome != null)
-            {
-                var pessoaAtualizada = _db.Connection.QueryFirstOrDefault<Pessoa>(" UPDATE Pessoas SET DataCriacao = @data, CEP = @cep, Telefone = @telefone, Nome = @nome WHERE CPF = @cpf",
-                new
-                {
-                    data = pessoa.DataCriacao,
-                    cep = pessoa.CEP,
-                    telefone = pessoa.Telefone,
-                    nome = pessoa.Nome,
-                    cpf = pessoa.CPF
-                });
-            }
+            _logger = logger;
         }
 
         public async Task SalvarAsync(List<Pessoa> pessoas)
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            var quantidadeDeErroFK = 0;
+            var quantidadeDeErroPK = 0;
+
             foreach (Pessoa pessoa in pessoas)
             {
-                var existe = await ExistePessoaAsync(pessoa.CPF);
-                if (existe == false)
+                try
                 {
-                    var pessoaSalva = _db.Connection.QueryFirstOrDefault<Pessoa>(" INSERT INTO TestesImportacao.dbo.Pessoas (Id, Nome, DataCriacao, CPF, CEP, Telefone) VALUES (@id, @nome, @data, @cpf, @cep,  @telefone);",
-                        new
-                        {
-                            id = pessoa.Id,
-                            nome = pessoa.Nome,
-                            data = pessoa.DataCriacao,
-                            cpf = pessoa.CPF,
-                            cep = pessoa.CEP,
-                            telefone = pessoa.Telefone
-                        });
+                    var insertPessoa = @"BEGIN
+                                   IF NOT EXISTS (SELECT P.CPF FROM TestesImportacao.dbo.Pessoas P where P.CPF = @cpf)
+                                   BEGIN
+                                       INSERT INTO TestesImportacao.dbo.Pessoas (Id, Nome, DataCriacao, CPF, CEP, Telefone) 
+                                        VALUES (@id, @nome, @data, @cpf, @cep,  @telefone);
+                                   END
+                                   ELSE
+                                   BEGIN
+                                        UPDATE Pessoas 
+                                        SET DataCriacao = @data, CEP = @cep, Telefone = @telefone, Nome = @nome WHERE CPF = @cpf
+                                   END 
+                                END";
+
+                    await _db.Connection.ExecuteAsync(insertPessoa,
+                       new
+                       {
+                           id = pessoa.Id,
+                           nome = pessoa.Nome,
+                           data = pessoa.DataCriacao,
+                           cpf = pessoa.CPF,
+                           cep = pessoa.CEP,
+                           telefone = pessoa.Telefone
+                       });
                 }
-                else
-                    await AtualizarAsync(pessoa);
+                catch (SqlException ex)
+                {
+                    //FK erro ou PK erro
+                    if (ex.Number == ErroForeignKey)
+                        quantidadeDeErroFK++;
+                    if (ex.Number == ErroPrimaryKey)
+                        quantidadeDeErroPK++;
+
+                    continue;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Erro: {ex.Message}");
+                    throw;
+                }
             }
+
+
+            _logger.LogInformation($"ErrosFK:{ErroForeignKey} - ErrosPK: {ErroPrimaryKey}");
+
+            stopwatch.Stop();
+            TimeSpan ts = stopwatch.Elapsed;
+            _logger.LogInformation("Tempo de duracao {0:00}:{1:00}:{2:00} em Pessoas ", ts.Hours, ts.Minutes, ts.Seconds);
         }
+
+
+
     }
 }

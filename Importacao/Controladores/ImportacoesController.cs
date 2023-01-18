@@ -70,10 +70,11 @@ namespace Importacao.Controllers
             {
                 var arquivoStream = Converter.LerStream(arquivo);
                 var pessoas = LerExcel.LerPessoas(arquivoStream);
-                await _pessoasRepositorio.SalvarAsync(pessoas);
                 var animais = LerExcel.LerAnimais(arquivoStream);
-                await _animaisRepositorio.SalvarAsync(animais);
-
+                await Task.WhenAll(
+                    _pessoasRepositorio.SalvarAsync(pessoas),
+                    _animaisRepositorio.SalvarAsync(animais)
+                );
                 return Ok();
             }
             catch (Exception ex)
